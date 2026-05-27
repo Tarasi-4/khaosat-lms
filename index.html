@@ -117,7 +117,6 @@
     z-index: 2;
     object-fit: contain;
     background: transparent;
-    /* Dùng filter biến logo màu tối thành màu trắng tinh để nổi trên nền navy */
     filter: brightness(0) invert(1);
     opacity: 0.95;
   }
@@ -350,10 +349,8 @@
 </div>
 
 <script>
-  // ==========================================
-  // THAY LINK GOOGLE APPS SCRIPT CỦA BẠN VÀO ĐÂY
-  // ==========================================
-  const SCRIPT_URL = 'const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwMufoH5KtVVJx-rMJPM7BfSLQs4raXyyRpLrFd9i77wWbp1fh1LOOu-TGn_bthbzwjVw/exec';'; 
+  // Sửa lỗi cú pháp dòng link ở đây:
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwMufoH5KtVVJx-rMJPM7BfSLQs4raXyyRpLrFd9i77wWbp1fh1LOOu-TGn_bthbzwjVw/exec'; 
 
   let userInfo = {};
 
@@ -369,34 +366,33 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
-  // Xử lý Gửi Form lên Google Sheets
+  // Xử lý Gửi Form lên Google Sheets theo chuẩn 9 CỘT
   document.getElementById('surveyForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
-    // Cảnh báo nếu chưa thay link web app
-    if(SCRIPT_URL.includes('thay-link-cua-ban')) {
-      alert("Vui lòng thay SCRIPT_URL trong code bằng link Google Apps Script của bạn trước khi chạy!");
-      return;
-    }
-
     const btnSubmit = document.getElementById('btnSubmit');
     btnSubmit.disabled = true;
     btnSubmit.innerHTML = 'Đang gửi...';
 
-    // Thu thập dữ liệu
+    // Thu thập dữ liệu theo chuẩn 9 cột
     const formData = new FormData();
-    formData.append('Họ và tên', userInfo.fullName);
+    formData.append('Tên', userInfo.fullName);
     formData.append('Email', userInfo.email);
-    formData.append('Phòng ban', userInfo.department);
-    formData.append('Q1 - Tìm kiếm', document.querySelector('input[name="q1"]:checked')?.value || '');
-    formData.append('Q2 - Nội dung', document.querySelector('input[name="q2"]:checked')?.value || '');
-    formData.append('Q3 - Sắp xếp', document.querySelector('input[name="q3"]:checked')?.value || '');
-    formData.append('Q4 - Khó khăn', document.querySelector('textarea[name="q4"]').value.trim());
-    formData.append('Q5 - Sẵn sàng', document.querySelector('input[name="q5"]:checked')?.value || '');
-    formData.append('Q5 Lý do', document.querySelector('textarea[name="q5_reason"]').value.trim());
+    formData.append('Đơn vị công tác', userInfo.department);
+    formData.append('Q1', document.querySelector('input[name="q1"]:checked')?.value || '');
+    formData.append('Q2', document.querySelector('input[name="q2"]:checked')?.value || '');
+    formData.append('Q3', document.querySelector('input[name="q3"]:checked')?.value || '');
+    formData.append('Q4', document.querySelector('textarea[name="q4"]').value.trim());
+    
+    // Gộp Q5 và Lý do
+    let q5_choice = document.querySelector('input[name="q5"]:checked')?.value || '';
+    let q5_reason = document.querySelector('textarea[name="q5_reason"]').value.trim();
+    let q5_final = q5_reason ? (q5_choice + ' (Lý do: ' + q5_reason + ')') : q5_choice;
+    formData.append('Q5', q5_final);
+
     formData.append('Thời gian', new Date().toLocaleString('vi-VN'));
 
-    // Gửi bằng fetch API (hoạt động hoàn hảo trên Github Pages)
+    // Gửi bằng fetch API
     fetch(SCRIPT_URL, { method: 'POST', body: formData })
       .then(response => {
         document.getElementById('surveyForm').style.display = 'none';
